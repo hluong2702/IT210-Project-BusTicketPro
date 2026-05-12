@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Đang chuyển sang VNPay — BusTicketPro</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body style="background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">
+<div class="card" style="max-width:480px;width:100%;text-align:center">
+  <div class="card-body" style="padding:32px">
+    <div class="spinner" style="margin:0 auto 16px"></div>
+    <h2 style="font-size:1.2rem;margin-bottom:8px">Đang chuyển sang VNPay</h2>
+    <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:20px">Vui lòng không đóng trình duyệt.</p>
+    <a th:href="${paymentUrl}" class="btn btn-primary">Tiếp tục thanh toán</a>
+  </div>
+</div>
+<script th:inline="javascript">
+  const paymentUrl = /*[[${paymentUrl}]]*/ '';
+  if (paymentUrl) {
+    window.location.replace(paymentUrl);
+  }
+</script>
+</body>
+</html>

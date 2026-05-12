@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+  <title>Dashboard Nhân Viên — BusTicketPro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{common/layout :: sidebar('dashboard')}"></div>
+  <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button id="sidebarToggle" class="sidebar-toggle">☰</button>
+      <span class="topbar-title">📋 Nhân viên — Tổng quan</span>
+      <div class="topbar-actions">
+        <span style="font-size:.875rem;color:var(--text-muted)">
+          Xin chào, <strong th:text="${staffName}">Nhân viên</strong>
+        </span>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);max-width:500px;margin-bottom:28px">
+        <div class="stat-card yellow">
+          <div class="stat-icon">⏳</div>
+          <div>
+            <div class="stat-value" th:text="${pendingCount}">0</div>
+            <div class="stat-label">Chờ xác nhận</div>
+          </div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon">🎫</div>
+          <div>
+            <div class="stat-value" th:text="${pendingTickets != null ? #lists.size(pendingTickets) : 0}">0</div>
+            <div class="stat-label">Cần xử lý hôm nay</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span>⏳ Vé chờ xác nhận thanh toán</span>
+          <a th:href="@{/staff/tickets}" class="btn btn-outline btn-sm">Xem tất cả</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div th:if="${#lists.isEmpty(pendingTickets)}" class="empty-state">
+            <div class="icon">✅</div>
+            <h3>Không có vé nào đang chờ</h3>
+            <p>Tất cả vé đã được xử lý</p>
+          </div>
+          <div th:unless="${#lists.isEmpty(pendingTickets)}" class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Mã vé</th>
+                  <th>Hành khách</th>
+                  <th>SĐT</th>
+                  <th>Tuyến đường</th>
+                  <th>Giờ đi</th>
+                  <th>Ghế</th>
+                  <th>Số tiền</th>
+                  <th>Đặt lúc</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="ticket : ${pendingTickets}">
+                  <td><code th:text="${ticket.ticketCode}">BTP</code></td>
+                  <td th:text="${ticket.passengerName}">Nguyễn A</td>
+                  <td th:text="${ticket.passengerPhone}">0912</td>
+                  <td>
+                    <span th:text="${ticket.departureName}">HN</span>
+                    <span style="color:var(--text-muted)"> → </span>
+                    <span th:text="${ticket.arrivalName}">HCM</span>
+                  </td>
+                  <td th:text="${#temporals.format(ticket.departureTime,'HH:mm dd/MM')}">06:00</td>
+                  <td><strong th:text="${ticket.seatNumber}">A1</strong></td>
+                  <td style="color:var(--primary);font-weight:700"
+                      th:text="${#numbers.formatDecimal(ticket.totalAmount,0,'COMMA',0,'POINT')} + ' đ'">450k</td>
+                  <td th:text="${#temporals.format(ticket.bookedAt,'HH:mm dd/MM')}">07:00</td>
+                  <td style="white-space:nowrap">
+                    <button class="btn btn-success btn-sm"
+                            th:onclick="|confirmPayment(${ticket.id}, '/staff/ticket/${ticket.id}/confirm')|">
+                      ✅ Xác nhận
+                    </button>
+                    <button class="btn btn-danger btn-sm"
+                            th:onclick="|cancelTicket(${ticket.id}, '/staff/ticket/${ticket.id}/cancel')|">
+                      ❌ Hủy
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{common/layout :: confirmModal}"></div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

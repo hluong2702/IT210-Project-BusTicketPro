@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tìm kiếm vé — BusTicketPro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body style="background:var(--bg)">
+
+<nav class="navbar">
+  <a class="navbar-brand" th:href="@{/}"><div class="brand-icon">🚌</div> BusTicketPro</a>
+  <div class="navbar-links">
+    <a th:href="@{/}" class="nav-link-pub">Trang chủ</a>
+    <a th:href="@{/ticket/lookup}" class="nav-link-pub">Tra cứu vé</a>
+    <div sec:authorize="isAuthenticated()">
+      <a th:href="@{/dashboard}" class="btn btn-primary btn-sm">🏠 Tài khoản</a>
+    </div>
+    <div sec:authorize="isAnonymous()">
+      <a th:href="@{/auth/login}" class="nav-link-pub">Đăng nhập</a>
+      <a th:href="@{/auth/register}" class="btn btn-primary btn-sm">Đăng ký</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero search bar -->
+<div style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:32px 20px 70px">
+  <form th:action="@{/search}" method="get" style="max-width:900px;margin:0 auto">
+    <div class="search-grid">
+       <div class="form-group" style="margin-bottom:0">
+         <label class="form-label" style="color:rgba(255,255,255,.8)">📍 Điểm đi</label>
+         <select name="departureId" class="form-control">
+           <option value="">-- Chọn điểm đi --</option>
+           <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
+                   th:selected="${loc.id == selectedDepartureId}">Hà Nội</option>
+         </select>
+       </div>
+       <div class="form-group" style="margin-bottom:0">
+         <label class="form-label" style="color:rgba(255,255,255,.8)">🏁 Điểm đến</label>
+         <select name="arrivalId" class="form-control">
+           <option value="">-- Chọn điểm đến --</option>
+           <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
+                   th:selected="${loc.id == selectedArrivalId}">HCM</option>
+         </select>
+       </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label" style="color:rgba(255,255,255,.8)">📅 Ngày đi</label>
+        <input type="date" name="date" class="form-control"
+               th:min="${today}" th:value="${selectedDate}"/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg">🔍 Tìm</button>
+    </div>
+  </form>
+</div>
+
+<div style="max-width:900px;margin:-40px auto 40px;padding:0 20px">
+
+  <div th:if="${error}" class="alert alert-danger" style="margin-bottom:20px">
+    ⚠️ <span th:text="${error}">Lỗi</span>
+  </div>
+
+  <!-- Results -->
+  <div th:if="${searched}">
+    <div th:if="${noTrips}" class="empty-state card">
+      <div class="icon">🚌</div>
+      <h3>Không tìm thấy chuyến xe</h3>
+      <p>Vui lòng thử lại với ngày khác hoặc tuyến đường khác</p>
+    </div>
+
+    <div th:unless="${noTrips}">
+      <div class="card-header" style="border-radius:var(--radius) var(--radius) 0 0;background:#fff;border:1px solid var(--border);border-bottom:none;padding:16px 20px">
+        <span style="font-weight:700">
+          🎫 Tìm thấy <strong th:text="${#lists.size(trips)}">0</strong> chuyến xe
+        </span>
+        <span style="font-size:.8rem;color:var(--text-muted)" th:text="${selectedDate}">Ngày</span>
+      </div>
+
+      <div th:each="trip : ${trips}">
+        <div class="trip-card" style="border-radius:0;border-top:none;margin-bottom:0">
+          <div class="trip-route">
+            <div class="trip-city">
+              <div class="city-time" th:text="${#temporals.format(trip.departureTime,'HH:mm')}">06:00</div>
+              <div class="city-name" th:text="${trip.route.departureLocation.name}">Hà Nội</div>
+              <div class="city-date" th:text="${#temporals.format(trip.departureTime,'dd/MM')}">01/01</div>
+            </div>
+            <div class="trip-divider">
+              <div class="line"></div>
+              <div class="trip-duration">
+                <span th:text="${trip.route.distanceKm + ' km'}">500 km</span>
+              </div>
+            </div>
+            <div class="trip-city">
+              <div class="city-time" th:text="${#temporals.format(trip.arrivalTime,'HH:mm')}">18:00</div>
+              <div class="city-name" th:text="${trip.route.arrivalLocation.name}">HCM</div>
+              <div class="city-date" th:text="${#temporals.format(trip.arrivalTime,'dd/MM')}">01/01</div>
+            </div>
+          </div>
+
+          <div style="flex:1;padding:0 20px;border-left:1px dashed var(--border)">
+            <div style="font-size:.8rem;color:var(--text-muted)">🚌 <span th:text="${trip.bus.busType.displayName}">Xe</span></div>
+            <div style="font-size:.8rem;margin-top:4px">🚗 <span th:text="${trip.bus.licensePlate}">51B</span></div>
+            <div th:if="${trip.bus.amenities}" style="font-size:.75rem;color:var(--text-muted);margin-top:4px"
+                 th:text="'✨ ' + ${trip.bus.amenities}">Wifi</div>
+          </div>
+
+          <div class="trip-meta">
+            <div class="trip-price" th:text="${#numbers.formatDecimal(trip.price,0,'COMMA',0,'POINT')} + ' đ'">450,000 đ</div>
+            <div class="trip-seats">còn ghế trống</div>
+            <div style="margin-top:10px">
+              <div sec:authorize="isAuthenticated()">
+                <a th:href="@{/booking/trip/{id}(id=${trip.id})}"
+                   class="btn btn-primary btn-sm">Chọn ghế →</a>
+              </div>
+              <div sec:authorize="isAnonymous()">
+                <a th:href="@{/auth/login}" class="btn btn-primary btn-sm">Đăng nhập để đặt</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="height:1px;background:var(--border)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Default state -->
+  <div th:unless="${searched}" style="text-align:center;padding:60px 20px">
+    <div style="font-size:4rem;margin-bottom:16px">🔍</div>
+    <h3 style="color:var(--text-secondary)">Tìm kiếm chuyến xe của bạn</h3>
+    <p style="color:var(--text-muted)">Chọn điểm đi, điểm đến và ngày để tìm kiếm</p>
+  </div>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

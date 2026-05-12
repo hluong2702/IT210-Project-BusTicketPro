@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Đặt vé thành công — BusTicketPro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+  <style>
+    .success-icon { width:80px;height:80px;background:linear-gradient(135deg,#10b981,#059669);
+                    border-radius:50%;display:flex;align-items:center;justify-content:center;
+                    font-size:2.2rem;margin:0 auto 20px;box-shadow:0 8px 24px rgba(16,185,129,.4); }
+    @keyframes bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+    .success-icon { animation: bounce .6s ease; }
+  </style>
+</head>
+<body style="background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">
+<div style="max-width:600px;width:100%">
+
+  <div class="card" style="text-align:center;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);padding:40px 20px">
+      <div class="success-icon">✅</div>
+      <h2 style="font-size:1.5rem;color:#065f46;margin-bottom:8px">Đặt vé thành công!</h2>
+      <p style="color:#047857;font-size:.9rem">Vui lòng thanh toán trong vòng 30 phút để xác nhận vé</p>
+    </div>
+
+    <div class="card-body" th:if="${ticket}">
+      <!-- Ticket code -->
+      <div style="background:var(--bg);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+        <div style="font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em">MÃ VÉ CỦA BẠN</div>
+        <div style="font-family:'Courier New',monospace;font-size:2rem;font-weight:800;color:var(--primary);letter-spacing:.1em;margin-top:4px"
+             th:text="${ticket.ticketCode}">BTP1234567</div>
+        <div class="badge badge-pending" style="margin-top:8px">⏳ Chờ thanh toán</div>
+      </div>
+
+      <!-- Trip info -->
+      <div class="ticket-info-grid" style="text-align:left">
+        <div class="ticket-info-item">
+          <div class="label">Tuyến đường</div>
+          <div class="value" th:text="${ticket.departureName + ' → ' + ticket.arrivalName}">HN → HCM</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="label">Giờ khởi hành</div>
+          <div class="value" th:text="${#temporals.format(ticket.departureTime,'HH:mm dd/MM/yyyy')}">06:00</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="label">Số ghế</div>
+          <div class="value" th:text="${ticket.seatNumber}">A01</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="label">Hành khách</div>
+          <div class="value" th:text="${ticket.passengerName}">Nguyễn A</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="label">Xe</div>
+          <div class="value" th:text="${ticket.licensePlate}">51B-12345</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="label">Tổng tiền</div>
+          <div class="value" style="color:var(--primary);font-size:1.1rem"
+               th:text="${#numbers.formatDecimal(ticket.totalAmount,0,'COMMA',0,'POINT')} + ' đ'">450,000 đ</div>
+        </div>
+      </div>
+
+      <div class="alert alert-warning" style="margin-top:20px;text-align:left">
+        ⚠️ <strong>Lưu ý:</strong> Vé sẽ tự động bị hủy sau 30 phút nếu chưa thanh toán.
+        Liên hệ nhân viên hoặc sử dụng VNPay để thanh toán.
+      </div>
+    </div>
+
+    <div class="card-footer" style="display:flex;gap:12px;justify-content:center">
+      <a th:href="@{/passenger/tickets}" class="btn btn-primary">🎫 Xem vé của tôi</a>
+      <a th:href="@{/}" class="btn btn-ghost">🔍 Tìm thêm vé</a>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

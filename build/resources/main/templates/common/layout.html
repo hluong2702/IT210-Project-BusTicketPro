@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="_csrf" th:content="${_csrf?.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+  <title th:text="${title} + ' — BusTicketPro'">BusTicketPro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚌</text></svg>"/>
+</head>
+
+<!-- ── Dashboard sidebar layout (fragments file) ── -->
+
+<!-- ── Sidebar fragment ── -->
+<nav th:fragment="sidebar(activeMenu)" class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">🚌</div>
+    <div>
+      <div class="brand-name">BusTicketPro</div>
+      <div class="brand-sub">Đặt vé xe liên tỉnh</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <!-- Admin menu -->
+    <div sec:authorize="hasRole('ADMIN')">
+      <div class="nav-section-title">Quản trị</div>
+      <div class="nav-item">
+        <a th:href="@{/admin/dashboard}" th:classappend="${activeMenu=='dashboard'} ? ' active'" class="nav-link">
+          <span class="icon">📊</span> Dashboard
+        </a>
+      </div>
+      <div class="nav-item">
+        <a th:href="@{/admin/buses}" th:classappend="${activeMenu=='buses'} ? ' active'" class="nav-link">
+          <span class="icon">🚌</span> Quản lý xe
+        </a>
+      </div>
+      <div class="nav-item">
+        <a th:href="@{/admin/routes}" th:classappend="${activeMenu=='routes'} ? ' active'" class="nav-link">
+          <span class="icon">🗺️</span> Tuyến đường
+        </a>
+      </div>
+      <div class="nav-item">
+        <a th:href="@{/admin/trips}" th:classappend="${activeMenu=='trips'} ? ' active'" class="nav-link">
+          <span class="icon">🗓️</span> Chuyến xe
+        </a>
+      </div>
+      <div class="nav-item">
+        <a th:href="@{/admin/tickets}" th:classappend="${activeMenu=='tickets'} ? ' active'" class="nav-link">
+          <span class="icon">🎫</span> Vé xe
+        </a>
+      </div>
+      <div class="nav-item">
+        <a th:href="@{/admin/users}" th:classappend="${activeMenu=='users'} ? ' active'" class="nav-link">
+          <span class="icon">👥</span> Người dùng
+        </a>
+      </div>
+    </div>
+
+    <!-- Staff menu -->
+    <div sec:authorize="hasRole('STAFF') and not hasRole('ADMIN')">
+      <div class="nav-section-title">Nhân viên</div>
+      <div class="nav-item">
+        <a th:href="@{/staff/dashboard}" th:classappend="${activeMenu=='dashboard'} ? ' active'" class="nav-link">
+          <span class="icon">📋</span> Tổng quan
+        </a>
+      </div>
+      <div class="nav-item">
+        <a th:href="@{/staff/tickets}" th:classappend="${activeMenu=='tickets'} ? ' active'" class="nav-link">
+          <span class="icon">🎫</span> Danh sách vé
+        </a>
+      </div>
+    </div>
+
+    <!-- Passenger menu -->
+    <div sec:authorize="hasRole('PASSENGER')">
+      <div class="nav-section-title">Hành khách</div>
+      <div class="nav-item">
+        <a th:href="@{/passenger/dashboard}" th:classappend="${activeMenu=='dashboard'} ? ' active'" class="nav-link">
+          <span class="icon">🏠</span> Tổng quan
+        </a>
+      </div>
+      <div class="nav-item">
+        <a th:href="@{/passenger/tickets}" th:classappend="${activeMenu=='tickets'} ? ' active'" class="nav-link">
+          <span class="icon">🎫</span> Vé của tôi
+        </a>
+      </div>
+      <div class="nav-item">
+        <a th:href="@{/passenger/profile}" th:classappend="${activeMenu=='profile'} ? ' active'" class="nav-link">
+          <span class="icon">👤</span> Hồ sơ
+        </a>
+      </div>
+    </div>
+
+    <!-- Common -->
+    <div class="nav-section-title" style="margin-top:12px">Tiện ích</div>
+    <div class="nav-item">
+      <a th:href="@{/}" class="nav-link">
+        <span class="icon">🔍</span> Tìm kiếm vé
+      </a>
+    </div>
+    <div class="nav-item">
+      <a th:href="@{/ticket/lookup}" class="nav-link">
+        <span class="icon">📋</span> Tra cứu vé
+      </a>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar" th:text="${#authentication != null ? #strings.substring(#authentication.principal.fullName,0,1) : 'U'}">A</div>
+      <div>
+        <div class="user-name" th:text="${#authentication != null ? #authentication.principal.fullName : 'Người dùng'}">Người dùng</div>
+        <div class="user-role" sec:authorize="hasRole('ADMIN')">Quản trị viên</div>
+        <div class="user-role" sec:authorize="hasRole('STAFF') and not hasRole('ADMIN')">Nhân viên</div>
+        <div class="user-role" sec:authorize="hasRole('PASSENGER')">Hành khách</div>
+      </div>
+      <a th:href="@{/auth/logout}" class="btn btn-ghost btn-sm" style="margin-left:auto" title="Đăng xuất">🚪</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Confirm Modal (global) ── -->
+<div th:fragment="confirmModal" id="confirmModal" class="modal-overlay">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">⚠️ Xác nhận</div>
+      <button class="modal-close" onclick="Modal.close('confirmModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage" style="font-size:.95rem;color:var(--text-secondary)">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.close('confirmModal')">Hủy</button>
+      <button id="confirmOk" class="btn btn-danger">Xác nhận</button>
+    </div>
+  </div>
+</div>
+</html>
